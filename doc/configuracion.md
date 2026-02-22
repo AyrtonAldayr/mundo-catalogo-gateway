@@ -70,6 +70,30 @@ Resumen: por perfil va lo que **depende del entorno**: URL del Config Server, ru
 
 **Variables de entorno**: Existe [.env.example](.env.example) con las variables que conviene configurar (perfil, Config Server, puerto, OTLP, logging). Sirve tanto en **local** como en CI/CD y despliegue: en local, copia a `.env` y muchos IDEs (VS Code, IntelliJ, etc.) pueden cargar ese archivo al arrancar la aplicación, así que no hace falta pasar las variables a mano. En CI/CD, define las mismas claves en el pipeline o en el ConfigMap/Secret del orquestador.
 
+### Cómo usar variables de entorno en application.yaml
+
+Spring Boot permite referenciar variables de entorno (o propiedades del sistema) en cualquier `application.yaml` o `application-<perfil>.yml` con la sintaxis de placeholders:
+
+- **`${VAR_NAME}`** — usa el valor de la variable de entorno `VAR_NAME`; si no está definida, la aplicación falla al arrancar (o el placeholder queda sin resolver, según la propiedad).
+- **`${VAR_NAME:valor_default}`** — usa `VAR_NAME` si existe; si no, usa `valor_default`. Así el YAML sigue funcionando sin definir la variable (por ejemplo en local con valores por defecto).
+
+Los nombres de variables que conviene usar están en [.env.example](.env.example). Un **ejemplo de cómo quedaría el application.yaml** usando solo esas variables (con valores por defecto) está en [doc/application-env-example.yml](application-env-example.yml). Ese archivo no lo carga Spring Boot; sirve de referencia para copiar los placeholders que necesites.
+
+Si quieres que tu `src/main/resources/application.yaml` lea desde el entorno solo algunas propiedades (por ejemplo perfil, puerto y OTLP), sustituye en ese archivo los valores literales por los placeholders que aparecen en `application-env-example.yml`. Ejemplo para el puerto y el perfil:
+
+```yaml
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  config:
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:}
+```
+
+Así, al arrancar en local o en el IDE sin definir variables se usan los defaults; si defines `SPRING_PROFILES_ACTIVE=produccion` o `SERVER_PORT=9090` (en `.env` o en el pipeline), Spring Boot usará esos valores.
+
 ---
 
 ## Config Client (Config Server)
