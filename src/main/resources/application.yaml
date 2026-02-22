@@ -16,10 +16,19 @@ spring:
   # Los perfiles que sí usan Config Server definen la URL en su application-<perfil>.yml.
   config:
     import: "optional:configserver:"
-  # JWT (cuando gateway.security.secured-path-patterns no está vacío): definir issuer o jwk-set.
-  # Ejemplo: security.oauth2.resourceserver.jwt.issuer-uri: https://idp.example.com/realms/mi-realm
-  # O: security.oauth2.resourceserver.jwt.jwk-set-uri: https://idp.example.com/realms/mi-realm/protocol/openid-connect/certs
-  # Se puede sobrescribir por perfil o desde Config Server.
+
+  # JWT (cuando gateway.security.secured-path-patterns no está vacío): definir UNA de estas dos opciones.
+  # Opción 1 – issuer-uri: Spring resuelve solo la URL del IdP (recomendado si el IdP expone OpenID Connect).
+  # Opción 2 – jwk-set-uri: URL directa del endpoint de claves públicas (certs). Sobrescribir por perfil o Config Server.
+  # Ejemplo (descomentar y ajustar la URL en application-<perfil>.yml o Config Server).
+  # security debe ir bajo spring (misma indentación que application, config):
+  # security:
+  #   oauth2:
+  #     resourceserver:
+  #       jwt:
+  #         issuer-uri: https://idp.example.com/realms/mi-realm
+  #         # O bien, en lugar de issuer-uri:
+  #         # jwk-set-uri: https://idp.example.com/realms/mi-realm/protocol/openid-connect/certs
 
 # Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
 
