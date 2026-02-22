@@ -113,6 +113,37 @@ spring:
 #   JWT: configurar spring.security.oauth2.resourceserver.jwt.issuer-uri (o jwk-set-uri)
 #   apuntando al Authorization Server que emite los tokens; se puede sobrescribir por entorno.
 #
+# Observabilidad: OpenTelemetry (métricas, trazas, logs) vía OTLP.
+# Sobrescribir en application-produccion.yml o Config Server con las URLs del Collector/backend.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/logs
+
+# Logging: archivo, rotación y retención. Detalle en logback-spring.xml.
+logging:
+  file:
+    name: ./logs/mundo-catalogo-gateway.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 500MB
+
 # Headers obligatorios y expresión regular que debe cumplir cada valor (todo en un solo lugar).
 # Clave = nombre del header, valor = regex. Evita inyección limitando caracteres permitidos.
 gateway:

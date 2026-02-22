@@ -17,3 +17,19 @@ spring:
     import: optional:configserver:http://config-server:8888
 server:
   port: 8080
+
+# Observabilidad: sobrescribir con las URLs del Collector/backend OTLP en tu entorno.
+management:
+  otlp:
+    metrics:
+      export:
+        url: http://otel-collector:4318/v1/metrics
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/logs
