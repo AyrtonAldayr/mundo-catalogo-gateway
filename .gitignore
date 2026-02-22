@@ -1,0 +1,58 @@
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/*.local
+
+### Variables de entorno (valores sensibles) ###
+.env
+
+
+### Skill ###
+.claude/
+.gemini/
+.agents/
+
+# Archivos de sistema de MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Archivos de atributos extendidos de Mac
+._*
+# Icono de volumen en MacOS
+.Icon?
+# Archivos de Spotlight
+.Spotlight-V100
+# Archivos de procesos de thumbnails de Mac
+.Trashes
+# Archivos temporales de macOS (menos comunes)
+.fseventsd
+# Volúmenes de montaje de red de MacOS
+.VolumeIcon.icns
