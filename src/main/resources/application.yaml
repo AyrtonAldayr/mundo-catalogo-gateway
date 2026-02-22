@@ -1,138 +1,27 @@
-# Configuración común a todos los ambientes.
-# Perfiles:
-#   local          - sin Config Server (solo YAML local)
-#   local-config   - con Config Server en localhost:8888 (optional)
-#   desarrollo     - con Config Server (optional)
-#   produccion     - con Config Server (optional)
-# Activar: --spring.profiles.active=local | local-config | desarrollo | produccion (por defecto: local)
+# Configuración común utilizada por todos los perfiles (local, local-container, desarrollo, produccion; default: local).
+# Para detalles sobre valores, configuración específica de perfiles y guía completa,
+# consulta el archivo doc/configuracion.md.
 
 spring:
   application:
     name: mundo-catalogo-gateway
   profiles:
     active: local
-  # Config Client: obligatorio declarar si se usa Config Server (2.4+).
-  # Este valor (sin URL) es el que se usa cuando NO se usa Config Server (ej. perfil local).
-  # Los perfiles que sí usan Config Server definen la URL en su application-<perfil>.yml.
   config:
     import: "optional:configserver:"
 
-  # JWT (cuando gateway.security.secured-path-patterns no está vacío): definir UNA de estas dos opciones.
-  # Opción 1 – issuer-uri: Spring resuelve solo la URL del IdP (recomendado si el IdP expone OpenID Connect).
-  # Opción 2 – jwk-set-uri: URL directa del endpoint de claves públicas (certs). Sobrescribir por perfil o Config Server.
-  # Ejemplo (descomentar y ajustar la URL en application-<perfil>.yml o Config Server).
-  # security debe ir bajo spring (misma indentación que application, config):
-  # security:
-  #   oauth2:
-  #     resourceserver:
-  #       jwt:
-  #         issuer-uri: https://idp.example.com/realms/mi-realm
-  #         # O bien, en lugar de issuer-uri:
-  #         # jwk-set-uri: https://idp.example.com/realms/mi-realm/protocol/openid-connect/certs
-  #         # Rotación de llaves: el JWK Set se cachea en memoria. Tiempo de vida del caché (segundos).
-  #         # Tras expirar, se vuelve a pedir al IdP y se usan las llaves nuevas. Ajustar según política del IdP.
-  #         # jwk-set-cache-lifespan: 300
-  #         # jwk-set-cache-refresh-time: 60
-  #         # Rotación de llaves: el JWK Set se cachea en memoria (p. ej. ~5 min por defecto).
-  #         # Tras expirar el caché, se vuelve a pedir al IdP y se usan las llaves nuevas.
-  #         # Si tu versión lo permite: jwk-set-cache-lifespan (segundos). Si no, ver doc o bean ReactiveJwtDecoder propio.
+gateway:
+  security:
+    enabled: true
+    secured-path-patterns: []
+  required-headers:
+    enabled: true
+    headers:
+      X-Request-Id: "^[a-zA-Z0-9\\-]{1,64}$"
+      X-Client-Id: "^[a-zA-Z0-9_\\-.]{1,64}$"
+      X-Tenant-Id: "^[a-zA-Z0-9_\\-]{1,64}$"
+      Accept-Language: "^[a-z]{2}(-[A-Z]{2})?$"
 
-# Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
-
-# URLs de las APIs (backends). Se definen por perfil en application-<perfil>.yml bajo
-# spring.cloud.gateway.server.webflux.routes.
-#
-# Headers obligatorios: NO van por ruta. Se aplican a todo el gateway (ver gateway.required-headers más abajo).
-# Método HTTP (GET, POST, etc.): por defecto solo se define Path, y la ruta acepta CUALQUIER método.
-#   Si quieres restringir a ciertos métodos, añade en predicates: Method=GET,POST (ejemplo comentado abajo).
-# Regla: un Path por id. Si el mismo backend atiende varios paths (ej. /api-admin y /api-public),
-#   definir una ruta por path, todas con la misma uri (los predicates en una ruta se combinan con AND).
-#
-# Predicates disponibles (sintaxis corta; se pueden combinar varios con AND):
-#   Path=/api/**                    - path de la petición (Ant-style)
-#   Method=GET,POST                 - método HTTP
-#   Header=X-Request-Id,\d+         - header con nombre y regexp del valor
-#   Host=**.somehost.org             - Host header (patrón Ant-style)
-#   Query=green                      - query param presente; Query=red,gree. con regexp opcional
-#   Cookie=chocolate,ch\.p           - cookie con nombre y regexp del valor
-#   RemoteAddr=192.168.1.1/24        - IP del cliente (CIDR)
-#   After=2025-01-01T00:00:00Z      - después de fecha/hora (ZonedDateTime)
-#   Before=2025-12-31T23:59:59Z     - antes de fecha/hora
-#   Between=datetime1,datetime2     - entre dos fechas (ventanas de mantenimiento)
-#   Weight=group1,8                  - peso para rutas del mismo grupo (ej. canary)
-#   XForwardedRemoteAddr=192.168.0.0/16  - IP según X-Forwarded-For (detrás de proxy)
-#
-# Ejemplo de estructura:
-#
-#   spring:
-#     cloud:
-#       gateway:
-#         server:
-#           webflux:
-#             routes:
-#               - id: catalog-api-admin
-#                 uri: http://localhost:8081
-#                 predicates:
-#                   - Path=/api-admin/**
-#               - id: catalog-api-public
-#                 uri: http://localhost:8081
-#                 predicates:
-#                   - Path=/api-public/**
-#               - id: search-api
-#                 uri: http://localhost:8082
-#                 predicates:
-#                   - Path=/search/**
-#               - id: inventory-api
-#                 uri: http://localhost:8083
-#                 predicates:
-#                   - Path=/inventory/**
-#               - id: admin-api
-#                 uri: http://localhost:8084
-#                 predicates:
-#                   - Path=/admin/**
-#                   - Method=GET,POST   # opcional: restringir a solo GET y POST
-#
-# Perfiles: application-local.yml, application-desarrollo.yml, application-produccion.yml.
-# Perfil local-config (sin archivo propio): mismo que local pero con Config Server en localhost:8888.
-# Activar: --spring.profiles.active=local-config. Requiere Config Server en localhost:8888 (optional).
-# Configuración de referencia (para recrear el perfil o usar en Config Server):
-#
-#   spring:
-#     cloud:
-#       gateway:
-#         server:
-#           webflux:
-#             routes:
-#               - id: catalog-api
-#                 uri: http://localhost:8081
-#                 predicates:
-#                   - Path=/api/**
-#     config:
-#       import: optional:configserver:http://localhost:8888
-#   server:
-#     port: 8080
-#
-# Kubernetes: las rutas son las mismas (id, uri, predicates); solo cambia el valor de uri.
-#   En K8s se usa el nombre del Service (DNS interno del cluster), no localhost.
-#   Mismo namespace:  uri: http://catalog-api:8080
-#   Otro namespace:   uri: http://catalog-api.otro-namespace.svc.cluster.local:8080
-#   Config Server en K8s: spring.config.import=optional:configserver:http://config-server:8888
-#   Secrets/issuer JWT: ConfigMaps, Secrets o Config Server. Ejemplo de uri en perfil producción:
-#     routes:
-#       - id: catalog-api
-#         uri: http://catalog-api:8080
-#         predicates:
-#           - Path=/api/**
-
-# Validación de token JWT (Authorization: Bearer) en rutas privadas:
-#   Paths protegidos se definen en gateway.security.secured-path-patterns (Ant-style).
-#   Cuando gateway.security.enabled es true y la lista no está vacía, Spring Security exige
-#   JWT válido en esos paths. Configurable por perfil o Config Server.
-#   JWT: configurar spring.security.oauth2.resourceserver.jwt.issuer-uri (o jwk-set-uri)
-#   apuntando al Authorization Server que emite los tokens; se puede sobrescribir por entorno.
-#
-# Observabilidad: OpenTelemetry (métricas, trazas, logs) vía OTLP.
-# Sobrescribir en application-produccion.yml o Config Server con las URLs del Collector/backend.
 management:
   endpoint:
     health:
@@ -160,32 +49,3 @@ management:
       export:
         otlp:
           endpoint: http://localhost:4318/v1/logs
-
-# Logging: ruta del archivo, rotación y retención están en logback-spring.xml (propiedades LOG_PATH, LOG_FILE y appender ROLLING).
-
-# Headers obligatorios y expresión regular que debe cumplir cada valor (todo en un solo lugar).
-# Clave = nombre del header, valor = regex. Evita inyección limitando caracteres permitidos.
-gateway:
-  security:
-    enabled: true
-    # Paths que exigen token válido. Vacío = ninguno. El filtro usa path y opcionalmente método.
-    # Formato: "path" (cualquier método) o "path:GET,POST" (solo esos métodos).
-    # No depende del entorno: mismo valor en local, contenedores o Kubernetes (solo se mira el path del request).
-    secured-path-patterns: []
-    # Ejemplo detallado (documentación; la config activa es la lista secured-path-patterns de arriba):
-    # api-name se relaciona con el id de la ruta en spring.cloud.gateway.server.webflux.routes. Para activar, rellenar secured-path-patterns.
-    #   - api-name: inventory-api
-    #     paths:
-    #       - /api/inventory/**:GET,POST,PUT,DELETE
-    #       - /api/list/**:POST
-    #   - api-name: admin-api
-    #     paths:
-    #       - /api/admin/**                  # sin ":" = cualquier método
-    #       - /api/admin/**:GET,POST,PUT,DELETE   # con ":" = solo esos métodos
-  required-headers:
-    enabled: true
-    headers:
-      X-Request-Id: "^[a-zA-Z0-9\\-]{1,64}$"
-      X-Client-Id: "^[a-zA-Z0-9_\\-.]{1,64}$"
-      X-Tenant-Id: "^[a-zA-Z0-9_\\-]{1,64}$"
-      Accept-Language: "^[a-z]{2}(-[A-Z]{2})?$"
