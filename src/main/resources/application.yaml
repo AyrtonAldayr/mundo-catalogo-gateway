@@ -92,7 +92,25 @@ spring:
 #                   - Path=/admin/**
 #                   - Method=GET,POST   # opcional: restringir a solo GET y POST
 #
-# Perfiles: application-local.yml, application-local-config.yml, application-desarrollo.yml, application-produccion.yml.
+# Perfiles: application-local.yml, application-desarrollo.yml, application-produccion.yml.
+# Perfil local-config (sin archivo propio): mismo que local pero con Config Server en localhost:8888.
+# Activar: --spring.profiles.active=local-config. Requiere Config Server en localhost:8888 (optional).
+# Configuración de referencia (para recrear el perfil o usar en Config Server):
+#
+#   spring:
+#     cloud:
+#       gateway:
+#         server:
+#           webflux:
+#             routes:
+#               - id: catalog-api
+#                 uri: http://localhost:8081
+#                 predicates:
+#                   - Path=/api/**
+#     config:
+#       import: optional:configserver:http://localhost:8888
+#   server:
+#     port: 8080
 #
 # Kubernetes: las rutas son las mismas (id, uri, predicates); solo cambia el valor de uri.
 #   En K8s se usa el nombre del Service (DNS interno del cluster), no localhost.
