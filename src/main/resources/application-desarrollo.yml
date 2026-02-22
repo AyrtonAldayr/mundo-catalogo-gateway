@@ -1,8 +1,8 @@
 # Perfil: desarrollo (entorno de integración/QA, típicamente contenerizado).
 # Activar: --spring.profiles.active=desarrollo
 # Conectado a Config Server (optional: si no está, arranca con config local).
-# Ajustar URI del Config Server y del backend según tu red.
-# Logging: sin archivo; solo consola (stdout) para que Docker/K8s capturen los logs.
+# Rutas: URI = nombre del servicio (mismo namespace) o host:puerto según tu red.
+# Logging: solo consola (stdout) para que Docker/K8s capturen los logs.
 
 spring:
   cloud:
@@ -11,13 +11,11 @@ spring:
         webflux:
           routes:
             - id: catalog-api
-              uri: http://localhost:8081
+              uri: http://catalog-api:8080
               predicates:
                 - Path=/api/**
   config:
     import: optional:configserver:http://config-server:8888
-server:
-  port: 8080
 
 logging:
   file:
