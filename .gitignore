@@ -31,6 +31,10 @@ build/
 ### VS Code ###
 .vscode/*.local
 
+### Logs (generados en runtime, no versionar) ###
+logs/
+*.log
+
 ### Variables de entorno (valores sensibles) ###
 .env
 
