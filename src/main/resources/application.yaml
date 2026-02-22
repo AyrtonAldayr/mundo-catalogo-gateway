@@ -11,6 +11,10 @@ spring:
     name: mundo-catalogo-gateway
   profiles:
     active: local
+  # Config Client: obligatorio declarar si se usa Config Server (2.4+).
+  # optional:configserver: permite arrancar sin servidor (perfil local).
+  config:
+    import: "optional:configserver:"
 
 # Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
 
