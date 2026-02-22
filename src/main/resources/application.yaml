@@ -29,6 +29,13 @@ spring:
   #         issuer-uri: https://idp.example.com/realms/mi-realm
   #         # O bien, en lugar de issuer-uri:
   #         # jwk-set-uri: https://idp.example.com/realms/mi-realm/protocol/openid-connect/certs
+  #         # Rotación de llaves: el JWK Set se cachea en memoria. Tiempo de vida del caché (segundos).
+  #         # Tras expirar, se vuelve a pedir al IdP y se usan las llaves nuevas. Ajustar según política del IdP.
+  #         # jwk-set-cache-lifespan: 300
+  #         # jwk-set-cache-refresh-time: 60
+  #         # Rotación de llaves: el JWK Set se cachea en memoria (p. ej. ~5 min por defecto).
+  #         # Tras expirar el caché, se vuelve a pedir al IdP y se usan las llaves nuevas.
+  #         # Si tu versión lo permite: jwk-set-cache-lifespan (segundos). Si no, ver doc o bean ReactiveJwtDecoder propio.
 
 # Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
 

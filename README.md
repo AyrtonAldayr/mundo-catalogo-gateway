@@ -49,6 +49,14 @@ Rutas y URIs de backends se definen en `application-<perfil>.yml` bajo `spring.c
 
 Detalle y ejemplos en `src/main/resources/application.yaml`.
 
+### Rotación de llaves y caché del JWK Set
+
+El gateway obtiene las claves públicas (JWK Set) del IdP y las cachea en memoria. Cuando el IdP (p. ej. Keycloak) rota llaves, el gateway usa las nuevas tras expirar ese caché. En `application.yaml` hay comentarios sobre el tiempo de vida del caché; si la versión de Spring Boot lo expone, se puede ajustar con la propiedad correspondiente; si no, puede hacerse con un bean `ReactiveJwtDecoder` propio que configure el caché.
+
+### Proteger el acceso al IdP (Keycloak): mTLS
+
+Por defecto solo se valida el certificado del servidor (HTTPS) al llamar al endpoint de JWKs. Si quieres que solo el gateway (u otros servicios autorizados) puedan acceder al IdP, opciones típicas son: restricción por red (firewall / políticas) o **mTLS** (certificado de cliente). Para mTLS hacia Keycloak (o el proxy delante), la auto-configuración del resource server no configura certificado de cliente; hay que definir un **`ReactiveJwtDecoder`** propio que use un `WebClient` (o cliente HTTP reactivo) con un `SSLContext` que incluya el certificado de cliente, y registrar ese bean para que Spring Security lo use en lugar del decoder por defecto.
+
 ## Cómo ejecutar
 
 ```bash
