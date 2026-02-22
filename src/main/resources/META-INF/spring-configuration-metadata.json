@@ -1,0 +1,24 @@
+{
+  "groups": [
+    {
+      "name": "gateway",
+      "sourceType": "com.mundo.catalogo.gateway.config.RequiredHeadersProperties",
+      "description": "Configuración propia del gateway (headers requeridos, etc.)."
+    }
+  ],
+  "properties": [
+    {
+      "name": "gateway.required-headers.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.mundo.catalogo.gateway.config.RequiredHeadersProperties",
+      "description": "Activa la validación de headers obligatorios en cada request.",
+      "defaultValue": true
+    },
+    {
+      "name": "gateway.required-headers.headers",
+      "type": "java.util.Map<java.lang.String, java.lang.String>",
+      "sourceType": "com.mundo.catalogo.gateway.config.RequiredHeadersProperties",
+      "description": "Mapa header -> regex. Cada header listado es obligatorio y su valor debe cumplir la expresión regular."
+    }
+  ]
+}
