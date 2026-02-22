@@ -23,6 +23,7 @@ Detalle en la carpeta **[doc/](doc/)**:
 
 - [doc/seguridad.md](doc/seguridad.md) — Alcance gateway vs microservicios, JWT, rotación de llaves, mTLS, certificados (OpenSSL), SSL Bundles
 - [doc/configuracion.md](doc/configuracion.md) — Perfiles y propiedades principales
+- [doc/observabilidad.md](doc/observabilidad.md) — OpenTelemetry, OTLP, logs, qué expone el gateway y cómo lo consume Grafana
 - [doc/kubernetes.md](doc/kubernetes.md) — Despliegue en Kubernetes
 
 ## Cómo ejecutar
