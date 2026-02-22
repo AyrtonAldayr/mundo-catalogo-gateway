@@ -1,0 +1,19 @@
+# Perfil: producción
+# Activar: --spring.profiles.active=produccion
+# Conectado a Config Server (optional: si no está, arranca con config local).
+# Ajustar URI del Config Server y del backend según tu despliegue.
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: catalog-api
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/**
+  config:
+    import: optional:configserver:http://config-server:8888
+server:
+  port: 8080
