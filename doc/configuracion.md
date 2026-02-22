@@ -2,14 +2,17 @@
 
 ## Perfiles
 
-| Perfil | Uso | Config Server | Seguridad JWT |
-|--------|-----|----------------|---------------|
-| `local` | Desarrollo en máquina sin IdP | No | Desactivada (`gateway.security.enabled: false`) |
-| `local-config` | Local con Config Server en `localhost:8888` | Sí (opcional) | Configurable |
-| `desarrollo` | Integración/QA | Sí (opcional) | Configurable |
-| `produccion` | Producción | Sí (opcional) | Configurable |
+| Perfil | Uso | Config Server | Log a archivo |
+|--------|-----|----------------|----------------|
+| `local` | Desarrollo en máquina sin IdP | No | Sí (`./logs/`) |
+| `local-config` | Local con Config Server en `localhost:8888` | Sí (opcional) | Sí |
+| `local-container` | Contenedor local (p. ej. docker compose): usar con `local` | No | No (solo consola) |
+| `desarrollo` | Integración/QA (contenedor) | Sí (opcional) | No (solo consola) |
+| `produccion` | Producción (contenedor) | Sí (opcional) | No (solo consola) |
 
 Activar perfil: `--spring.profiles.active=local` (por defecto `local`).
+
+En **contenedor local** (docker compose): `SPRING_PROFILES_ACTIVE=local,local-container`. En **Kubernetes** suele usarse `desarrollo` o `produccion`; en ambos el logging va solo a consola (stdout) para que el orquestador capture los logs.
 
 ## Propiedades principales
 

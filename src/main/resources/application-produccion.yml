@@ -1,7 +1,8 @@
-# Perfil: producción
+# Perfil: producción (contenedor en K8s u otro orquestador).
 # Activar: --spring.profiles.active=produccion
 # Conectado a Config Server (optional: si no está, arranca con config local).
 # Ajustar URI del Config Server y del backend según tu despliegue.
+# Logging: sin archivo; solo consola (stdout) para que el orquestador capture los logs.
 
 spring:
   cloud:
@@ -17,6 +18,10 @@ spring:
     import: optional:configserver:http://config-server:8888
 server:
   port: 8080
+
+logging:
+  file:
+    name: ""  # Solo consola en contenedor; logback no usa ROLLING en este perfil.
 
 # Observabilidad: sobrescribir con las URLs del Collector/backend OTLP en tu entorno.
 management:

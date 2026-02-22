@@ -116,6 +116,15 @@ spring:
 # Observabilidad: OpenTelemetry (métricas, trazas, logs) vía OTLP.
 # Sobrescribir en application-produccion.yml o Config Server con las URLs del Collector/backend.
 management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
   endpoints:
     web:
       exposure:
@@ -134,15 +143,7 @@ management:
         otlp:
           endpoint: http://localhost:4318/v1/logs
 
-# Logging: archivo, rotación y retención. Detalle en logback-spring.xml.
-logging:
-  file:
-    name: ./logs/mundo-catalogo-gateway.log
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 30
-      total-size-cap: 500MB
+# Logging: ruta del archivo, rotación y retención están en logback-spring.xml (propiedades LOG_PATH, LOG_FILE y appender ROLLING).
 
 # Headers obligatorios y expresión regular que debe cumplir cada valor (todo en un solo lugar).
 # Clave = nombre del header, valor = regex. Evita inyección limitando caracteres permitidos.

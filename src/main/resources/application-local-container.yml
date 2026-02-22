@@ -1,0 +1,13 @@
+# Perfil: local-container (gateway en contenedor en tu máquina, p. ej. docker compose).
+# Activar junto a local: SPRING_PROFILES_ACTIVE=local,local-container
+# Incluye lo necesario para ejecutar en contenedor sin escribir logs a archivo.
+# Logback solo usa ROLLING (archivo) en perfiles local y local-config; aquí solo CONSOLE + OTEL.
+
+# Este archivo *chanca* (sobrescribe) la configuración que esté definida en application.yml 
+# y hereda (mantiene) todas las demás configuraciones que existan en otros profiles, 
+# aplicando solo los valores necesarios para el entorno local-container (por ejemplo, 
+# deshabilitando logs en archivo y forzando salida solo a consola).
+
+logging:
+  file:
+    name: ""

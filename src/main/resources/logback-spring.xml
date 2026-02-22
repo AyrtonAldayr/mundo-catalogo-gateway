@@ -7,26 +7,39 @@
 	<property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
 	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH}/mundo-catalogo-gateway.log}"/>
 
-	<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_FILE}</file>
-		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-			<fileNamePattern>${LOG_FILE}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-			<maxFileSize>10MB</maxFileSize>
-			<maxHistory>30</maxHistory>
-			<totalSizeCap>500MB</totalSizeCap>
-		</rollingPolicy>
-		<encoder>
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-			<charset>UTF-8</charset>
-		</encoder>
-	</appender>
+	<!-- Log a archivo solo cuando (local o local-config) y NO local-container; en contenedor solo CONSOLE + OTEL -->
+	<springProfile name="(local | local-config) &amp; !local-container">
+		<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<file>${LOG_FILE}</file>
+			<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+				<fileNamePattern>${LOG_FILE}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+				<maxFileSize>10MB</maxFileSize>
+				<maxHistory>30</maxHistory>
+				<totalSizeCap>500MB</totalSizeCap>
+			</rollingPolicy>
+			<encoder>
+				<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+				<charset>UTF-8</charset>
+			</encoder>
+		</appender>
+	</springProfile>
 
 	<appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
 	</appender>
 
-	<root level="INFO">
-		<appender-ref ref="CONSOLE"/>
-		<appender-ref ref="ROLLING"/>
-		<appender-ref ref="OTEL"/>
-	</root>
+	<!-- (local o local-config) sin local-container: consola + archivo (ROLLING) + OTEL -->
+	<springProfile name="(local | local-config) &amp; !local-container">
+		<root level="INFO">
+			<appender-ref ref="CONSOLE"/>
+			<appender-ref ref="ROLLING"/>
+			<appender-ref ref="OTEL"/>
+		</root>
+	</springProfile>
+	<!-- desarrollo, produccion, o local-container: solo consola + OTEL. En XML & se escribe &amp; -->
+	<springProfile name="!local &amp; !local-config | local-container">
+		<root level="INFO">
+			<appender-ref ref="CONSOLE"/>
+			<appender-ref ref="OTEL"/>
+		</root>
+	</springProfile>
 </configuration>

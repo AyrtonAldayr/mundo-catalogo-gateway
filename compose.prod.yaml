@@ -1,0 +1,14 @@
+# Production override: set resource limits. Build the image first, then:
+#   docker compose -f compose.yaml -f compose.prod.yaml up -d
+
+services:
+  gateway:
+    image: mundo-catalogo-gateway:latest
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: "0.5"
+        reservations:
+          memory: 384M
+          cpus: "0.2"

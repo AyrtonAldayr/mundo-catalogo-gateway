@@ -1,0 +1,24 @@
+# Build output (JAR is built inside the image)
+target/
+
+# Version control and IDE
+.git
+.gitignore
+.idea
+.cursor
+*.iml
+*.ipr
+*.iws
+.vscode
+*.swp
+*.swo
+
+# Documentation and plans (not needed in image)
+*.md
+doc/
+.cursor/
+logs/
+
+# Test and local
+.DS_Store
+*.log

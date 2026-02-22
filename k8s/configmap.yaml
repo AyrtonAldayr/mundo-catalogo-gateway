@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mundo-catalogo-gateway-config
+  labels:
+    app: mundo-catalogo-gateway
+data:
+  SPRING_PROFILES_ACTIVE: "produccion"
+  SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888"
