@@ -28,6 +28,48 @@ Por línea de comandos: `--spring.profiles.active=desarrollo`. Por variable de e
 
 ---
 
+## Base vs perfil: qué configurar en cada uno
+
+Análisis de qué valores conviene tener en **application.yaml** (base, común a todos) y qué debe ir en **application-&lt;perfil&gt;.yml** (por ambiente).
+
+### Mantener en la base (application.yaml)
+
+| Propiedad | Motivo |
+|-----------|--------|
+| `spring.application.name` | Identidad de la aplicación; no cambia por entorno. |
+| `spring.profiles.active` | Valor por defecto (ej. `local`); se sobrescribe por línea de comandos o variable de entorno. |
+| `spring.config.import` | En base: `optional:configserver:` (sin URL) para cuando no se usa Config Server; los perfiles que sí lo usan sobrescriben la URL. |
+| `gateway.required-headers` (enabled, headers) | Reglas de validación de headers son contrato de API; suelen ser las mismas en todos los ambientes. Si en algún entorno necesitas otros headers o regex, sobrescribe solo ese perfil. |
+| `gateway.security.secured-path-patterns` | Lista de paths que exigen JWT; si es la misma en local, desarrollo y producción, basta con dejarla en base. Si en producción proteges más rutas, define la lista en `application-produccion.yml`. |
+| `management.endpoint.health.*` (probes, liveness, readiness) | Comportamiento deseado igual en todos los entornos (K8s o no). |
+| `management.endpoints.web.exposure.include` | Por defecto `health,info` en todos; solo cambia si en desarrollo quieres exponer más (ej. `metrics`, `loggers`) en ese perfil. |
+
+Resumen: en la base va lo que es **común a todos los ambientes** (nombre, contrato de headers, reglas de seguridad por path, health y exposición mínima de actuator).
+
+---
+
+### Configurar por perfil (application-local.yml, application-desarrollo.yml, application-produccion.yml, etc.)
+
+| Propiedad | Motivo |
+|-----------|--------|
+| `server.port` | Puede estar en base (ej. 8080) y solo sobrescribirse si un entorno usa otro puerto. Hoy los perfiles lo repiten; opcional unificar en base y quitar de perfiles si siempre es 8080. |
+| `spring.config.import` (URL) | Perfiles que usan Config Server deben definir la URL (ej. `optional:configserver:http://config-server:8888`). En base solo `optional:configserver:`. |
+| `spring.cloud.gateway.server.webflux.routes` | **Siempre por ambiente**: en local son URIs tipo `localhost:8081`; en desarrollo/producción son nombres de servicio (ej. `http://catalog-api:8080`). No se puede compartir la misma lista en base. |
+| `gateway.security.enabled` | Local suele ir con `false` (sin IdP); desarrollo/producción con `true`. Claramente por perfil. |
+| `logging.file.name` | En local (sin contenedor) puede no definirse o usar el default (log a archivo); en local-container, desarrollo y producción suele ser `""` para solo consola. Por perfil. |
+| `management.otlp.*` y `management.opentelemetry.*` | En base: valores por defecto (ej. `localhost:4318`) para desarrollo local. En producción (y opcionalmente en desarrollo): URLs del Collector o backend OTLP del entorno. Por perfil. |
+
+Resumen: por perfil va lo que **depende del entorno**: URL del Config Server, rutas del gateway (URIs de backends), si la seguridad JWT está activa, si se escribe log a archivo o solo consola, y URLs de exportación OTLP.
+
+---
+
+### Resumen rápido
+
+- **Base**: nombre de la app, perfil por defecto, Config Client sin URL, headers obligatorios, paths que exigen JWT (si son comunes), health/probes, exposición de actuator por defecto. Opcionalmente `server.port` y URLs OTLP por defecto para local.
+- **Perfil**: URL del Config Server (si aplica), **rutas del gateway** (siempre), `gateway.security.enabled`, `logging.file.name`, URLs OTLP cuando el entorno tenga Collector/backend distinto. Opcionalmente `server.port` o `exposure.include` si ese ambiente es distinto.
+
+---
+
 ## Config Client (Config Server)
 
 - En Spring Boot 2.4+ es obligatorio declarar `spring.config.import` si se usa Config Server.
