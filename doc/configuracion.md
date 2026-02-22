@@ -68,6 +68,8 @@ Resumen: por perfil va lo que **depende del entorno**: URL del Config Server, ru
 - **Base**: nombre de la app, perfil por defecto, Config Client sin URL, headers obligatorios, paths que exigen JWT (si son comunes), health/probes, exposición de actuator por defecto. Opcionalmente `server.port` y URLs OTLP por defecto para local.
 - **Perfil**: URL del Config Server (si aplica), **rutas del gateway** (siempre), `gateway.security.enabled`, `logging.file.name`, URLs OTLP cuando el entorno tenga Collector/backend distinto. Opcionalmente `server.port` o `exposure.include` si ese ambiente es distinto.
 
+**Variables de entorno**: Existe [.env.example](.env.example) con las variables que conviene configurar (perfil, Config Server, puerto, OTLP, logging). Sirve tanto en **local** como en CI/CD y despliegue: en local, copia a `.env` y muchos IDEs (VS Code, IntelliJ, etc.) pueden cargar ese archivo al arrancar la aplicación, así que no hace falta pasar las variables a mano. En CI/CD, define las mismas claves en el pipeline o en el ConfigMap/Secret del orquestador.
+
 ---
 
 ## Config Client (Config Server)
