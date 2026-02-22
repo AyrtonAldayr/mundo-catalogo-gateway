@@ -1,0 +1,16 @@
+# Perfil: local (desarrollo en máquina)
+# Activar: --spring.profiles.active=local
+
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: catalog-api
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/**

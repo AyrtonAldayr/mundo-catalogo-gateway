@@ -1,3 +1,27 @@
+# Configuración común a todos los ambientes.
+# Perfiles:
+#   local          - sin Config Server (solo YAML local)
+#   local-config   - con Config Server en localhost:8888 (optional)
+#   desarrollo     - con Config Server (optional)
+#   produccion     - con Config Server (optional)
+# Activar: --spring.profiles.active=local | local-config | desarrollo | produccion (por defecto: local)
+
 spring:
   application:
     name: mundo-catalogo-gateway
+  profiles:
+    active: local
+
+# Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
+
+# Headers obligatorios y expresión regular que debe cumplir cada valor (todo en un solo lugar).
+# Clave = nombre del header, valor = regex. Evita inyección limitando caracteres permitidos.
+# Para rutas privadas, añadir después validación de Authorization (filtro o Spring Security por path).
+gateway:
+  required-headers:
+    enabled: true
+    headers:
+      X-Request-Id: "^[a-zA-Z0-9\\-]{1,64}$"
+      X-Client-Id: "^[a-zA-Z0-9_\\-.]{1,64}$"
+      X-Tenant-Id: "^[a-zA-Z0-9_\\-]{1,64}$"
+      Accept-Language: "^[a-z]{2}(-[A-Z]{2})?$"

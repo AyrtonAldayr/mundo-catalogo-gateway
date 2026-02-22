@@ -1,0 +1,19 @@
+# Mensajes del gateway por idioma (i18n).
+# Se usa el header Accept-Language para elegir la clave (es, en, etc.).
+# Placeholders: {0}, {1} se sustituyen por los argumentos en orden.
+
+es:
+  gateway:
+    error:
+      title: "Headers inválidos o faltantes"
+      missing_only: "Headers faltantes: {0}"
+      invalid_only: "Headers con formato inválido (revisar caracteres permitidos): {0}"
+      both: "Headers faltantes: {0}. Formato inválido: {1}"
+
+en:
+  gateway:
+    error:
+      title: "Invalid or missing headers"
+      missing_only: "Missing headers: {0}"
+      invalid_only: "Headers with invalid format (check allowed characters): {0}"
+      both: "Missing headers: {0}. Invalid format: {1}"
