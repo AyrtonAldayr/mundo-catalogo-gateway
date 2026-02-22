@@ -255,9 +255,113 @@ management:
           endpoint: http://localhost:4318/v1/logs
 ```
 
-- **health.probes**: habilita los endpoints `/live` y `/ready` para probes de Kubernetes.
-- **endpoints.web.exposure.include**: expone `health` e `info` por HTTP (ajustar si necesitas más).
-- **otlp / opentelemetry**: URLs del exportador OTLP (métricas, trazas, logs); en producción apuntar al Collector o backend (Loki, Tempo, Mimir, etc.).
+### Health y probes (Kubernetes)
+
+Propiedades disponibles y valores posibles:
+
+| Propiedad | Valores | Descripción |
+|-----------|---------|-------------|
+| `management.endpoint.health.probes.enabled` | `true`, `false` | Si `true`, expone `/actuator/health/liveness` y `/actuator/health/readiness` además de `/actuator/health`. En K8s se detecta el entorno y se habilitan por defecto; en otros entornos hay que ponerlo en `true` para usarlos. |
+| `management.health.livenessstate.enabled` | `true`, `false` | Habilita el indicador de liveness (app viva). K8s reinicia el contenedor si falla. |
+| `management.health.readinessstate.enabled` | `true`, `false` | Habilita el indicador de readiness (app lista para tráfico). K8s deja de enviar tráfico si falla. |
+| `management.endpoint.health.probes.add-additional-paths` | `true`, `false` | Si `true`, expone liveness en `/livez` y readiness en `/readyz` también en el puerto principal (útil si actuator está en otro puerto). |
+
+Recomendaciones:
+
+- **Kubernetes**: deja `probes.enabled`, `livenessstate.enabled` y `readinessstate.enabled` en `true`. Usa en el deployment `path: /actuator/health/liveness` y `path: /actuator/health/readiness` (o `/livez` y `/readyz` si usas `add-additional-paths=true`).
+- **Local / sin K8s**: si quieres probar los mismos endpoints, pon solo `management.endpoint.health.probes.enabled=true`; los otros dos suelen estar ya en `true`.
+- **Liveness** no debe depender de sistemas externos (DB, APIs); si fallan, K8s reiniciaría todos los pods. **Readiness** puede incluir comprobaciones externas si tiene sentido (ej. no recibir tráfico si la DB está caída).
+
+---
+
+### Endpoints expuestos por HTTP (`exposure.include`)
+
+Propiedad: `management.endpoints.web.exposure.include`. Lista de IDs de endpoint separados por comas, o `*` para todos.
+
+**Valores posibles (IDs de endpoint):**
+
+| ID | Descripción |
+|----|-------------|
+| `health` | Estado de salud (y, si están habilitados, liveness/readiness). |
+| `info` | Información de la aplicación (build, git, etc.). |
+| `metrics` | Métricas (Micrometer). |
+| `env` | Variables de entorno y propiedades (sensible). |
+| `configprops` | Propiedades de `@ConfigurationProperties` (puede ser sensible). |
+| `beans` | Lista de beans de Spring (sensible en producción). |
+| `mappings` | Rutas HTTP registradas. |
+| `loggers` | Ver/cambiar nivel de loggers. |
+| `caches` | Caches disponibles. |
+| `scheduledtasks` | Tareas programadas. |
+| `httpexchanges` | Últimos intercambios HTTP (requiere bean `HttpExchangeRepository`). |
+| `threaddump` | Dump de hilos. |
+| `heapdump` | Descarga del heap (solo web; puede ser pesado). |
+| `auditevents` | Eventos de auditoría. |
+| `conditions` | Condiciones de auto-configuración. |
+| `flyway`, `liquibase` | Migraciones (si usas Flyway/Liquibase). |
+| `startup` | Pasos de arranque. |
+| `shutdown` | Apagado graceful (deshabilitado por defecto; muy sensible). |
+
+También existe `management.endpoints.web.exposure.exclude`: lista de IDs a excluir (prevalece sobre `include`). Ejemplo: `include: "*"` y `exclude: env,beans,shutdown`.
+
+Recomendaciones:
+
+- **Producción mínima**: `health,info` (solo comprobaciones y versión). Es lo que usa este proyecto por defecto.
+- **Depuración / no producción**: añadir `metrics`, `mappings`, `loggers`; o `include: "*"` y `exclude: env,beans,shutdown` si quieres casi todo pero sin lo más sensible.
+- **Nunca** expongas `env`, `beans` o `shutdown` en producción sin control de acceso (firewall, auth).
+
+Ejemplo ampliado (solo para desarrollo):
+
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,mappings,loggers
+        # exclude: env,beans   # opcional si usas include: "*"
+```
+
+---
+
+### OTLP y OpenTelemetry (métricas, trazas, logs)
+
+Propiedades disponibles (las que aplican a este proyecto y su versión de Spring Boot):
+
+| Propiedad | Valores / tipo | Descripción |
+|-----------|----------------|-------------|
+| `management.otlp.metrics.export.url` | URL (string) | Endpoint OTLP para métricas (ej. `http://localhost:4318/v1/metrics` o el Collector en producción). |
+| `management.otlp.metrics.export.step` | Duración (ej. `1m`, `30s`) | Intervalo de envío de métricas. Por defecto suele ser 1 minuto. |
+| `management.otlp.metrics.export.enabled` | `true`, `false` | Activa o desactiva la exportación OTLP de métricas. |
+| `management.opentelemetry.tracing.export.otlp.endpoint` | URL (string) | Endpoint OTLP para trazas (ej. `http://localhost:4318/v1/traces`). |
+| `management.opentelemetry.logging.export.otlp.endpoint` | URL (string) | Endpoint OTLP para logs (ej. `http://localhost:4318/v1/logs`). |
+
+Opcionales (según versión): `management.otlp.metrics.export.headers` (cabeceras, ej. auth), timeouts/compresión en tracing si tu versión los expone.
+
+Recomendaciones:
+
+- **Local**: URLs a `localhost:4318` (OpenTelemetry Collector u otro receptor OTLP en tu máquina).
+- **Producción**: sustituir por la URL del Collector o del backend (Loki, Tempo, Mimir, etc.) en `application-produccion.yml` o Config Server. Si no usas observabilidad en un entorno, puedes poner `management.otlp.metrics.export.enabled: false` y/o no configurar los endpoints de tracing/logging.
+- **Un solo Collector**: suele ser la misma base (ej. `http://otel-collector:4318`) y paths distintos (`/v1/metrics`, `/v1/traces`, `/v1/logs`).
+
+Ejemplo para producción (mismo Collector):
+
+```yaml
+management:
+  otlp:
+    metrics:
+      export:
+        url: http://otel-collector.monitoring.svc.cluster.local:4318/v1/metrics
+        step: 1m
+        enabled: true
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://otel-collector.monitoring.svc.cluster.local:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://otel-collector.monitoring.svc.cluster.local:4318/v1/logs
+```
 
 ---
 
