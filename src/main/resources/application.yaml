@@ -91,19 +91,18 @@ gateway:
   security:
     enabled: true
     # Paths que exigen token válido. Vacío = ninguno. El filtro usa path y opcionalmente método.
-    # Formato: "path" (cualquier método) o "path:GET,POST" (solo esos métodos). URI es documental (rutas en spring.cloud.gateway).
+    # Formato: "path" (cualquier método) o "path:GET,POST" (solo esos métodos).
     secured-path-patterns: []
     # Ejemplo detallado (documentación; la config activa es la lista secured-path-patterns de arriba):
-    # Por API: nombre, uri del backend y paths con métodos. Para activar, rellenar secured-path-patterns con los path o path:METHODS.
+    # api-name se relaciona con el id de la ruta en spring.cloud.gateway.server.webflux.routes. Para activar, rellenar secured-path-patterns.
     #   - api-name: inventory-api
-    #     uri: http://localhost:8083
     #     paths:
     #       - /api/inventory/**:GET,POST,PUT,DELETE
     #       - /api/list/**:POST
     #   - api-name: admin-api
-    #     uri: http://localhost:8084
     #     paths:
-    #       - /api/admin/**:GET,POST,PUT,DELETE
+    #       - /api/admin/**                  # sin ":" = cualquier método
+    #       - /api/admin/**:GET,POST,PUT,DELETE   # con ":" = solo esos métodos
   required-headers:
     enabled: true
     headers:
