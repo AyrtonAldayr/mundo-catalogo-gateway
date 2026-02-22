@@ -19,6 +19,26 @@ spring:
 
 # Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
 
+# URLs de las APIs (backends). Se definen por perfil en application-<perfil>.yml bajo
+# spring.cloud.gateway.server.webflux.routes. Ejemplo de estructura:
+#
+#   spring:
+#     cloud:
+#       gateway:
+#         server:
+#           webflux:
+#             routes:
+#               - id: catalog-api
+#                 uri: http://localhost:8081    # API de catálogo (local)
+#                 predicates:
+#                   - Path=/api/**
+#               - id: otro-servicio
+#                 uri: http://localhost:8082
+#                 predicates:
+#                   - Path=/otro/**
+#
+# Perfiles: application-local.yml, application-local-config.yml, application-desarrollo.yml, application-produccion.yml.
+
 # Headers obligatorios y expresión regular que debe cumplir cada valor (todo en un solo lugar).
 # Clave = nombre del header, valor = regex. Evita inyección limitando caracteres permitidos.
 # Para rutas privadas, añadir después validación de Authorization (filtro o Spring Security por path).
