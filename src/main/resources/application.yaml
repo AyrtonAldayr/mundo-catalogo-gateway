@@ -20,7 +20,29 @@ spring:
 # Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
 
 # URLs de las APIs (backends). Se definen por perfil en application-<perfil>.yml bajo
-# spring.cloud.gateway.server.webflux.routes. Ejemplo de estructura:
+# spring.cloud.gateway.server.webflux.routes.
+#
+# Headers obligatorios: NO van por ruta. Se aplican a todo el gateway (ver gateway.required-headers más abajo).
+# Método HTTP (GET, POST, etc.): por defecto solo se define Path, y la ruta acepta CUALQUIER método.
+#   Si quieres restringir a ciertos métodos, añade en predicates: Method=GET,POST (ejemplo comentado abajo).
+# Regla: un Path por id. Si el mismo backend atiende varios paths (ej. /api-admin y /api-public),
+#   definir una ruta por path, todas con la misma uri (los predicates en una ruta se combinan con AND).
+#
+# Predicates disponibles (sintaxis corta; se pueden combinar varios con AND):
+#   Path=/api/**                    - path de la petición (Ant-style)
+#   Method=GET,POST                 - método HTTP
+#   Header=X-Request-Id,\d+         - header con nombre y regexp del valor
+#   Host=**.somehost.org             - Host header (patrón Ant-style)
+#   Query=green                      - query param presente; Query=red,gree. con regexp opcional
+#   Cookie=chocolate,ch\.p           - cookie con nombre y regexp del valor
+#   RemoteAddr=192.168.1.1/24        - IP del cliente (CIDR)
+#   After=2025-01-01T00:00:00Z      - después de fecha/hora (ZonedDateTime)
+#   Before=2025-12-31T23:59:59Z     - antes de fecha/hora
+#   Between=datetime1,datetime2     - entre dos fechas (ventanas de mantenimiento)
+#   Weight=group1,8                  - peso para rutas del mismo grupo (ej. canary)
+#   XForwardedRemoteAddr=192.168.0.0/16  - IP según X-Forwarded-For (detrás de proxy)
+#
+# Ejemplo de estructura:
 #
 #   spring:
 #     cloud:
@@ -28,14 +50,27 @@ spring:
 #         server:
 #           webflux:
 #             routes:
-#               - id: catalog-api
-#                 uri: http://localhost:8081    # API de catálogo (local)
+#               - id: catalog-api-admin
+#                 uri: http://localhost:8081
 #                 predicates:
-#                   - Path=/api/**
-#               - id: otro-servicio
+#                   - Path=/api-admin/**
+#               - id: catalog-api-public
+#                 uri: http://localhost:8081
+#                 predicates:
+#                   - Path=/api-public/**
+#               - id: search-api
 #                 uri: http://localhost:8082
 #                 predicates:
-#                   - Path=/otro/**
+#                   - Path=/search/**
+#               - id: inventory-api
+#                 uri: http://localhost:8083
+#                 predicates:
+#                   - Path=/inventory/**
+#               - id: admin-api
+#                 uri: http://localhost:8084
+#                 predicates:
+#                   - Path=/admin/**
+#                   - Method=GET,POST   # opcional: restringir a solo GET y POST
 #
 # Perfiles: application-local.yml, application-local-config.yml, application-desarrollo.yml, application-produccion.yml.
 
