@@ -172,6 +172,8 @@ spring:
 
 ## Seguridad del gateway
 
+Esta capa de seguridad (paths protegidos por JWT y headers obligatorios) **es propia de este proyecto**, no viene del framework. Spring Cloud Gateway y Spring Security ofrecen la base (p. ej. OAuth2 Resource Server para JWT); nosotros definimos las propiedades `gateway.security.*` y `gateway.required-headers.*` y los filtros que las consumen.
+
 - **Paths que exigen JWT**: `gateway.security.secured-path-patterns` (Ant-style). Formato: `"path"` (cualquier método) o `"path:GET,POST"`. No depende del entorno (local, contenedor o K8s).
 - **Headers obligatorios**: `gateway.required-headers`. Clave = nombre del header, valor = regex. Se aplican a todo el gateway; evitan inyección limitando caracteres permitidos.
 
