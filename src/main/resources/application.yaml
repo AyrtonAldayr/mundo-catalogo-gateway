@@ -12,7 +12,8 @@ spring:
   profiles:
     active: local
   # Config Client: obligatorio declarar si se usa Config Server (2.4+).
-  # optional:configserver: permite arrancar sin servidor (perfil local).
+  # Este valor (sin URL) es el que se usa cuando NO se usa Config Server (ej. perfil local).
+  # Los perfiles que sí usan Config Server definen la URL en su application-<perfil>.yml.
   config:
     import: "optional:configserver:"
 
