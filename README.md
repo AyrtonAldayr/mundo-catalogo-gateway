@@ -30,7 +30,7 @@ Detalle en la carpeta **[doc/](doc/)**:
 
 ```bash
 ./mvnw spring-boot:run
-# Con perfil: --spring.profiles.active=local-config
+# Con otro perfil: --spring.profiles.active=desarrollo
 ```
 
 Puerto por defecto: `8080`. Rutas de ejemplo en `application-local.yml`; en Kubernetes se usan nombres de Service (ver [doc/kubernetes.md](doc/kubernetes.md)).

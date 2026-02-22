@@ -7,8 +7,8 @@
 	<property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
 	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH}/mundo-catalogo-gateway.log}"/>
 
-	<!-- Log a archivo solo cuando (local o local-config) y NO local-container; en contenedor solo CONSOLE + OTEL -->
-	<springProfile name="(local | local-config) &amp; !local-container">
+	<!-- Log a archivo solo cuando perfil local y NO local-container; en contenedor solo CONSOLE + OTEL -->
+	<springProfile name="local &amp; !local-container">
 		<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
 			<file>${LOG_FILE}</file>
 			<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -27,8 +27,8 @@
 	<appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
 	</appender>
 
-	<!-- (local o local-config) sin local-container: consola + archivo (ROLLING) + OTEL -->
-	<springProfile name="(local | local-config) &amp; !local-container">
+	<!-- local sin local-container: consola + archivo (ROLLING) + OTEL -->
+	<springProfile name="local &amp; !local-container">
 		<root level="INFO">
 			<appender-ref ref="CONSOLE"/>
 			<appender-ref ref="ROLLING"/>
@@ -36,7 +36,7 @@
 		</root>
 	</springProfile>
 	<!-- desarrollo, produccion, o local-container: solo consola + OTEL. En XML & se escribe &amp; -->
-	<springProfile name="!local &amp; !local-config | local-container">
+	<springProfile name="!local | local-container">
 		<root level="INFO">
 			<appender-ref ref="CONSOLE"/>
 			<appender-ref ref="OTEL"/>

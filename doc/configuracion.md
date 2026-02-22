@@ -9,34 +9,12 @@ Configuración común en `src/main/resources/application.yaml`. Perfiles en `app
 | Perfil | Uso | Config Server | Log a archivo |
 |--------|-----|----------------|----------------|
 | `local` | Desarrollo en máquina sin IdP | No | Sí (`./logs/`) |
-| `local-config` | Local con Config Server en `localhost:8888` | Sí (opcional) | Sí |
 | `local-container` | Contenedor local (docker compose): usar con `local` | No | No (solo consola) |
 | `desarrollo` | Integración/QA (contenedor) | Sí (opcional) | No |
 | `produccion` | Producción (contenedor) | Sí (opcional) | No |
 
 - **Contenedor local**: `SPRING_PROFILES_ACTIVE=local,local-container`.
 - **Kubernetes**: suele usarse `desarrollo` o `produccion`; en ambos el logging va solo a consola (stdout).
-
-### Perfil `local-config` (sin archivo propio)
-
-Mismo concepto que `local` pero conectado al Config Server. No hay `application-local-config.yml`; la configuración de referencia está aquí. Para usarlo: activar `--spring.profiles.active=local-config` y tener Config Server en `localhost:8888` (opcional), o definir esta configuración en el Config Server.
-
-```yaml
-spring:
-  cloud:
-    gateway:
-      server:
-        webflux:
-          routes:
-            - id: catalog-api
-              uri: http://localhost:8081
-              predicates:
-                - Path=/api/**
-  config:
-    import: optional:configserver:http://localhost:8888
-server:
-  port: 8080
-```
 
 ---
 

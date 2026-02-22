@@ -7,7 +7,7 @@ Documento de investigación sobre mejores prácticas (Spring, comunidad, Kuberne
 ## 1. Contexto del proyecto
 
 - **Stack**: Spring Boot 4.0.3, Java 25, Spring Cloud Gateway (WebFlux), Config Server (opcional), Actuator, OpenTelemetry, Security/OAuth2.
-- **Perfiles**: `local`, `local-config`, `desarrollo`, `produccion`.
+- **Perfiles**: `local`, `desarrollo`, `produccion`.
 - **Objetivo**: Docker + Docker Compose + manifiestos/listos para Kubernetes, optimizando CPU/memoria y buenas prácticas.
 
 ---
@@ -118,7 +118,7 @@ La JVM usa memoria **fuera del heap** (metaspace, code cache, threads, buffers n
 
 ### 4.4 Desarrollo vs producción
 
-- **Desarrollo**: puede usar `build: .` y volúmenes de código si se desea; perfiles `local` o `local-config`.
+- **Desarrollo**: puede usar `build: .` y volúmenes de código si se desea; perfil `local`.
 - **Producción**: imagen ya construida (`image: ...`), sin bind mounts de código, con límites de recursos y políticas de restart.
 
 **Conclusión**: Un `compose.yaml` base (gateway + opcionalmente Config Server), con healthcheck y recursos; opcionalmente `compose.override.yaml` para desarrollo y `compose.prod.yaml` para producción.
