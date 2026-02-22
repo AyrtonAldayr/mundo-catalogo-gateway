@@ -77,6 +77,18 @@ spring:
 #                   - Method=GET,POST   # opcional: restringir a solo GET y POST
 #
 # Perfiles: application-local.yml, application-local-config.yml, application-desarrollo.yml, application-produccion.yml.
+#
+# Kubernetes: las rutas son las mismas (id, uri, predicates); solo cambia el valor de uri.
+#   En K8s se usa el nombre del Service (DNS interno del cluster), no localhost.
+#   Mismo namespace:  uri: http://catalog-api:8080
+#   Otro namespace:   uri: http://catalog-api.otro-namespace.svc.cluster.local:8080
+#   Config Server en K8s: spring.config.import=optional:configserver:http://config-server:8888
+#   Secrets/issuer JWT: ConfigMaps, Secrets o Config Server. Ejemplo de uri en perfil producción:
+#     routes:
+#       - id: catalog-api
+#         uri: http://catalog-api:8080
+#         predicates:
+#           - Path=/api/**
 
 # Validación de token JWT (Authorization: Bearer) en rutas privadas:
 #   Paths protegidos se definen en gateway.security.secured-path-patterns (Ant-style).
@@ -92,6 +104,7 @@ gateway:
     enabled: true
     # Paths que exigen token válido. Vacío = ninguno. El filtro usa path y opcionalmente método.
     # Formato: "path" (cualquier método) o "path:GET,POST" (solo esos métodos).
+    # No depende del entorno: mismo valor en local, contenedores o Kubernetes (solo se mira el path del request).
     secured-path-patterns: []
     # Ejemplo detallado (documentación; la config activa es la lista secured-path-patterns de arriba):
     # api-name se relaciona con el id de la ruta en spring.cloud.gateway.server.webflux.routes. Para activar, rellenar secured-path-patterns.
