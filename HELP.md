@@ -1,5 +1,10 @@
 # Getting Started
 
+### Startup messages (informational)
+
+**"Connection refused" to Config Server (localhost:8888)**  
+If on startup you see warnings like `Could not locate PropertySource ... Connection refused` for `http://localhost:8888`, this is normal when running **without** a Config Server. The app uses `optional:configserver:`, so startup does not fail: only local config (YAML) is used and the application continues. To use Config Server, run one on port 8888 or set the URL in the matching profile (e.g. `application-local-config.yml`).
+
 ### Reference Documentation
 For further reference, please consider the following sections:
 
