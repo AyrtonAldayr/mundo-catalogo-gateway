@@ -1,8 +1,13 @@
 # Perfil: local (desarrollo en máquina)
 # Activar: --spring.profiles.active=local
+# Seguridad JWT desactivada para no depender de IdP.
 
 server:
   port: 8080
+
+gateway:
+  security:
+    enabled: false
 
 spring:
   cloud:

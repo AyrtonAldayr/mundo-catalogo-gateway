@@ -1,5 +1,19 @@
-{"properties": [{
-  "name": "gateway.required-headers.enabled",
-  "type": "java.lang.String",
-  "description": "A description for 'gateway.required-headers.enabled'"
-}]}
+{
+  "properties": [
+    {
+      "name": "gateway.required-headers.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Si están activos los headers obligatorios (X-Request-Id, etc.)."
+    },
+    {
+      "name": "gateway.security.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Si la validación JWT está activa. false = no se exige token en ningún path."
+    },
+    {
+      "name": "gateway.security.secured-path-patterns",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Paths Ant-style que exigen token. Formato: path (cualquier método) o path:GET,POST (solo esos métodos)."
+    }
+  ]
+}

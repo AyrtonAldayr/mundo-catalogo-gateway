@@ -16,6 +16,10 @@ spring:
   # Los perfiles que sí usan Config Server definen la URL en su application-<perfil>.yml.
   config:
     import: "optional:configserver:"
+  # JWT (cuando gateway.security.secured-path-patterns no está vacío): definir issuer o jwk-set.
+  # Ejemplo: security.oauth2.resourceserver.jwt.issuer-uri: https://idp.example.com/realms/mi-realm
+  # O: security.oauth2.resourceserver.jwt.jwk-set-uri: https://idp.example.com/realms/mi-realm/protocol/openid-connect/certs
+  # Se puede sobrescribir por perfil o desde Config Server.
 
 # Mensajes de error del gateway (i18n): ver src/main/resources/messages.yml (idioma según Accept-Language).
 
@@ -74,18 +78,32 @@ spring:
 #
 # Perfiles: application-local.yml, application-local-config.yml, application-desarrollo.yml, application-produccion.yml.
 
-# Validación de token (Authorization) en rutas privadas:
-#   Opción A – Filtro global por path: un GlobalFilter (como RequiredHeadersGlobalFilter) que revise
-#     exchange.getRequest().getPath().value() y, si coincide con una lista de paths protegidos (ej. /api/admin/**),
-#     exija header Authorization (Bearer <token>) y valide el token (JWT local o llamada a OAuth2 introspection).
-#     Si falta o es inválido → 401. La lista de paths se puede poner en YAML (gateway.secured-paths).
-#   Opción B – Spring Security: añadir spring-boot-starter-oauth2-resource-server y configurar
-#     requestMatchers("/api/admin/**").authenticated(); el resto permitAll(). Spring valida el JWT por path.
-#   No se hace con predicates: los predicates solo enrutan; la validación del token es un filtro o Security.
+# Validación de token JWT (Authorization: Bearer) en rutas privadas:
+#   Paths protegidos se definen en gateway.security.secured-path-patterns (Ant-style).
+#   Cuando gateway.security.enabled es true y la lista no está vacía, Spring Security exige
+#   JWT válido en esos paths. Configurable por perfil o Config Server.
+#   JWT: configurar spring.security.oauth2.resourceserver.jwt.issuer-uri (o jwk-set-uri)
+#   apuntando al Authorization Server que emite los tokens; se puede sobrescribir por entorno.
 #
 # Headers obligatorios y expresión regular que debe cumplir cada valor (todo en un solo lugar).
 # Clave = nombre del header, valor = regex. Evita inyección limitando caracteres permitidos.
 gateway:
+  security:
+    enabled: true
+    # Paths que exigen token válido. Vacío = ninguno. El filtro usa path y opcionalmente método.
+    # Formato: "path" (cualquier método) o "path:GET,POST" (solo esos métodos). URI es documental (rutas en spring.cloud.gateway).
+    secured-path-patterns: []
+    # Ejemplo detallado (documentación; la config activa es la lista secured-path-patterns de arriba):
+    # Por API: nombre, uri del backend y paths con métodos. Para activar, rellenar secured-path-patterns con los path o path:METHODS.
+    #   - api-name: inventory-api
+    #     uri: http://localhost:8083
+    #     paths:
+    #       - /api/inventory/**:GET,POST,PUT,DELETE
+    #       - /api/list/**:POST
+    #   - api-name: admin-api
+    #     uri: http://localhost:8084
+    #     paths:
+    #       - /api/admin/**:GET,POST,PUT,DELETE
   required-headers:
     enabled: true
     headers:
